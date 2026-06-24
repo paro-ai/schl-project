@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Journey of Artificial Intelligence</title>
+  <style>
+    :root{
+      --bg1:#05060a;
+      --bg2:#0b0f18;
+      --glass: rgba(255,255,255,0.04);
+      --glass-2: rgba(255,255,255,0.02);
+      --cyan:#00f0ff;
+      --purple:#b300ff;
+      --accent: linear-gradient(135deg,var(--cyan),var(--purple));
+      --card-radius:16px;
+      --glass-border: rgba(255,255,255,0.06);
+      --text: #eaf7ff;
+      --muted: #9fb7c6;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color:var(--text);
+      background:
+        radial-gradient(600px 300px at 10% 10%, rgba(0,240,255,0.06), transparent 8%),
+        radial-gradient(500px 300px at 90% 90%, rgba(179,0,255,0.05), transparent 8%),
+        linear-gradient(180deg,var(--bg1),var(--bg2));
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:24px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+    }
+
+    .wrap{
+      width:1100px;
+      max-width:100%;
+      display:grid;
+      gap:20px;
+      grid-template-columns: 1fr 420px;
+      align-items:start;
+    }
+
+    @media (max-width:950px){
+      .wrap{grid-template-columns:1fr; padding-bottom:40px}
+    }
+
+    header.hero{
+      grid-column:1 / -1;
+      display:flex;
+      gap:18px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .hero-left{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+    }
+    .title{
+      font-size:28px;
+      font-weight:700;
+      letter-spacing: -0.02em;
+      line-height:1.05;
+    }
+    .subtitle{
+      color:var(--muted);
+      margin-top:6px;
+      font-size:14px;
+    }
+
+    .hero-cta{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .btn{
+      background: linear-gradient(90deg, rgba(0,240,255,0.12), rgba(179,0,255,0.10));
+      border:1px solid rgba(255,255,255,0.06);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:600;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6), 0 0 18px rgba(0,240,255,0.02) inset;
+      backdrop-filter: blur(6px);
+    }
+
+    /* Left column content */
+    main{
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+    }
+
+    /* Cube / 3D model */
+    .model-card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--card-radius);
+      padding:18px;
+      border:1px solid var(--glass-border);
+      box-shadow: 0 10px 30px rgba(2,6,23,0.7);
+      display:flex;
+      gap:18px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+
+    .cube-stage{
+      width:380px;
+      height:300px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      perspective:1200px;
+      position:relative;
+      touch-action:none;
+    }
+    @media (max-width:950px){
+      .cube-stage{width:100%; height:280px}
+    }
+    .cube{
+      width:180px;
+      height:180px;
+      position:relative;
+      transform-style:preserve-3d;
+      transition: transform 120ms linear;
+      will-change:transform;
+    }
+    .face{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:14px;
+      color:#00131a;
+      font-weight:700;
+      font-size:15px;
+      text-align:center;
+      padding:10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.88));
+      border:1px solid rgba(255,255,255,0.6);
+    }
+    .face{ transition: transform .18s ease, box-shadow .18s ease; cursor:pointer }
+    .face:hover{ transform: translateZ(6px) scale(1.03); box-shadow: 0 18px 40px rgba(0,0,0,0.6) }
+    .face .dim{ position:absolute; bottom:8px; left:8px; right:8px; background:rgba(2,6,23,0.9); color:var(--muted); font-size:12px; padding:6px 8px; border-radius:8px; display:none; border:1px solid rgba(255,255,255,0.03)}
+    .face:hover .dim, .face.show-dim .dim{ display:block }
+
+    /* Position faces */
+    .f-data{ transform: rotateY(0deg) translateZ(90px); background:linear-gradient(180deg, #e6fff9, #dff7f5); }
+    .f-training{ transform: rotateY(90deg) translateZ(90px); background:linear-gradient(180deg, #f7e8ff, #f1d8ff); }
+    .f-model{ transform: rotateY(180deg) translateZ(90px); background:linear-gradient(180deg, #fff4e6, #fff0d9); }
+    .f-prompt{ transform: rotateY(-90deg) translateZ(90px); background:linear-gradient(180deg, #e6f0ff, #d9e9ff); }
+    .f-output{ transform: rotateX(90deg) translateZ(90px); background:linear-gradient(180deg, #e6fff1, #cff7e6); }
+    .f-feedback{ transform: rotateX(-90deg) translateZ(90px); background:linear-gradient(180deg, #fff0f6, #ffe6f0); }
+
+    /* Glow outlines */
+    .face::after{
+      content:'';
+      position:absolute; inset:0;
+      border-radius:14px;
+      box-shadow: 0 0 28px rgba(0,240,255,0.06), inset 0 0 20px rgba(179,0,255,0.02);
+      pointer-events:none;
+    }
+
+    .model-controls{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:flex-end;
+      min-width:220px;
+    }
+    .dim-panel{ width:220px; text-align:left; color:var(--muted); font-size:13px }
+    .model-controls p{ margin:0; color:var(--muted); font-size:13px }
+    .spin-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:10px;
+      cursor:pointer;
+      background: linear-gradient(90deg, rgba(0,240,255,0.06), rgba(179,0,255,0.06));
+      border:1px solid rgba(255,255,255,0.04);
+    }
+
+    /* Timeline */
+    .timeline{
+      display:grid;
+      gap:12px;
+      grid-template-columns: repeat(2,1fr);
+    }
+    @media (max-width:760px){ .timeline{grid-template-columns:1fr} }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;
+      padding:12px;
+      border:1px solid var(--glass-border);
+      position:relative;
+      overflow:hidden;
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .card:hover{ transform: translateY(-6px); box-shadow: 0 18px 40px rgba(1,6,20,0.6) }
+
+    .card h4{ margin:0 0 6px 0; font-size:15px}
+    .card .date{ color:var(--muted); font-size:13px; margin-bottom:8px }
+    .card .extra{
+      font-size:13px;
+      color:var(--muted);
+      max-height:0;
+      opacity:0;
+      transition: all .22s ease;
+    }
+    .card:hover .extra,
+    .card.expanded .extra{
+      max-height:240px;
+      opacity:1;
+      margin-top:8px;
+    }
+
+    /* How AI Works */
+    .flow{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .flow .step{
+      min-width:160px;
+      flex:1;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;
+      padding:10px;
+      text-align:center;
+      border:1px solid var(--glass-border);
+      position:relative;
+      backdrop-filter: blur(6px);
+    }
+    .flow .arrow{
+      width:36px;
+      height:4px;
+      background:linear-gradient(90deg,var(--cyan),var(--purple));
+      border-radius:4px;
+      align-self:center;
+    }
+
+    /* Right column */
+    aside.right{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      align-items:stretch;
+    }
+
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px;
+      padding:14px;
+      border:1px solid var(--glass-border);
+      box-shadow: 0 8px 28px rgba(1,6,20,0.6);
+    }
+    .keywords{ display:flex; gap:8px; flex-wrap:wrap }
+    .chip{
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.04);
+      cursor:pointer;
+      color:var(--text);
+      font-weight:600;
+      font-size:13px;
+    }
+    .chip.active{
+      background: linear-gradient(90deg, rgba(0,240,255,0.12), rgba(179,0,255,0.12));
+      box-shadow: 0 10px 30px rgba(0,240,255,0.06), 0 0 24px rgba(179,0,255,0.04) inset;
+    }
+
+    .detail{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:13px;
+      min-height:80px;
+    }
+
+    /* Scrolling credits */
+    .credits-wrap{
+      height:120px;
+      overflow:hidden;
+      position:relative;
+      border-radius:12px;
+      border:1px solid var(--glass-border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+      padding:12px;
+    }
+    .credits{
+      display:block;
+      animation: rollUp 40s linear infinite;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.8;
+      text-align:center;
+      transform-origin:center;
+      padding-top:100%;
+    }
+    .credits.paused{ animation-play-state:paused; opacity:0.9 }
+    .credits-wrap:hover .credits{ animation-play-state:paused }
+    .credits small{ display:block; color:var(--muted); font-size:12px; opacity:0.9 }
+
+    @keyframes rollUp{
+      0%{ transform:translateY(0) }
+      100%{ transform:translateY(-70%) }
+    }
+
+    /* QR */
+    .qr-placeholder{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .qr-box{
+      width:110px;
+      height:110px;
+      border-radius:12px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid var(--glass-border);
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+    }
+
+    footer.note{ grid-column:1/-1; color:var(--muted); font-size:13px; text-align:center; margin-top:6px }
+
+    /* small embellishments */
+    .glow-band{
+      height:6px;
+      border-radius:8px;
+      background: linear-gradient(90deg, rgba(0,240,255,0.25), rgba(179,0,255,0.25));
+      filter:blur(10px);
+      opacity:0.12;
+      margin-top:6px;
+    }
+
+    /* subtle decorative animated dots */
+    .stars{
+      position:fixed; inset:0; pointer-events:none; z-index:0;
+      background-image:
+        radial-gradient(rgba(0,240,255,0.06) 1px, transparent 1px),
+        radial-gradient(rgba(179,0,255,0.04) 1px, transparent 1px);
+      background-size: 120px 120px, 180px 180px;
+      opacity:0.28;
+      mix-blend-mode:screen;
+    }
+    /* floating words */
+    .float-wrap{
+      position:absolute; inset:0; pointer-events:none; z-index:1;
+    }
+    .float-word{
+      position:absolute;
+      padding:6px 10px;
+      border-radius:999px;
+      background: linear-gradient(90deg, rgba(0,240,255,0.06), rgba(179,0,255,0.06));
+      color:var(--text);
+      font-size:12px;
+      backdrop-filter: blur(6px);
+      border:1px solid rgba(255,255,255,0.03);
+      transform-origin:center;
+      animation: floaty 8s infinite linear;
+      opacity:0.95;
+      cursor:pointer;
+      pointer-events:auto;
+    }
+    @keyframes floaty{
+      0%{ transform: translateY(0) rotate(0deg) }
+      50%{ transform: translateY(-18px) rotate(3deg) }
+      100%{ transform: translateY(0) rotate(0deg) }
+    }
+
+    /* AI apps */
+    .apps-grid{
+      display:grid; grid-template-columns: repeat(2,1fr); gap:12px;
+    }
+    @media (max-width:760px){ .apps-grid{ grid-template-columns:1fr } }
+    .app-card{
+      display:flex; gap:10px; align-items:center; padding:10px; border-radius:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.03); position:relative; overflow:visible; cursor:pointer;
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .app-card:hover{ transform: translateY(-6px); box-shadow: 0 18px 40px rgba(1,6,20,0.6) }
+    .app-icon{ width:56px; height:56px; border-radius:10px; display:grid; place-items:center; flex-shrink:0; background:linear-gradient(90deg,var(--cyan),var(--purple)); color:#021019; font-weight:800 }
+    .app-info{ flex:1 }
+    .app-title{ font-weight:700; font-size:14px }
+    .app-sub{ color:var(--muted); font-size:13px }
+    .app-side{
+      position:absolute; right:-280px; top:8px; width:260px; padding:12px; border-radius:10px; background:rgba(2,6,23,0.9); color:var(--muted); border:1px solid rgba(255,255,255,0.04);
+      transform:translateX(0); transition: right .22s ease, opacity .22s ease; opacity:0; pointer-events:none;
+    }
+    .app-card:hover .app-side{ right:64px; opacity:1; pointer-events:auto }
+
+    /* QR generator area */
+    .qr-controls{ display:flex; gap:8px; align-items:center; margin-top:8px }
+    .qr-controls input{ flex:1; padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); color:var(--text) }
+    .qr-img{ width:140px; height:140px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); display:grid; place-items:center; background:rgba(255,255,255,0.02) }
+  /* Future headline feature */
+  .headline-box{ padding:12px; border-radius:10px; background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.03); text-align:center }
+  .headline-text{ color:var(--cyan); font-weight:800; font-size:16px }
+  .confetti{ position:fixed; left:0; top:0; width:100%; height:100%; pointer-events:none; overflow:hidden; z-index:9999 }
+  .confetti .piece{ position:absolute; width:8px; height:14px; opacity:0.95; transform-origin:center; }
+  </style>
+</head>
+<body>
+  <div class="stars" aria-hidden="true"></div>
+  <div class="float-wrap" id="floatWrap" aria-hidden="true"></div>
+
+  <div class="wrap" role="main">
+    <header class="hero">
+      <div class="hero-left">
+        <div>
+          <div class="title">Journey of Artificial Intelligence</div>
+          <div class="subtitle">A short interactive guide for school visitors and teachers — explore history, ideas, and how AI works.</div>
+        </div>
+      </div>
+      <div class="hero-cta">
+        <button class="btn" id="startBtn" onclick="document.getElementById('cubeStage').scrollIntoView({behavior:'smooth'})">Explore the AI Mechanism</button>
+        <button class="btn" onclick="document.getElementById('timeline').scrollIntoView({behavior:'smooth'})">View Timeline</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Model / 3D -->
+      <section class="model-card" id="cubeStage">
+        <div class="cube-stage" id="stage">
+          <div class="cube" id="cube" aria-label="3D model showing AI components">
+            <div class="face f-data">Data</div>
+            <div class="face f-training">Training</div>
+            <div class="face f-model">Model</div>
+            <div class="face f-prompt">Prompt / Input</div>
+            <div class="face f-output">Output</div>
+            <div class="face f-feedback">Feedback</div>
+          </div>
+        </div>
+
+        <div class="model-controls" aria-hidden="false">
+          <p><strong>AI Mechanism</strong><br><span style="color:var(--muted)">Data → Training → Model → Input → Output → Feedback</span></p>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="spin-btn" id="toggleSpin" title="Pause or resume auto-spin">Pause</button>
+            <button class="spin-btn" id="resetBtn" title="Reset rotation">Reset</button>
+          </div>
+          <div class="dim-panel" id="dimPanel">Hover a face to see details (Data, Training, Model, Prompt, Output, Feedback)</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:6px">Drag to rotate on desktop. Touch-drag on mobile.</p>
+          <div class="glow-band" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <!-- Timeline -->
+      <section class="panel" id="timeline">
+        <h3 style="margin:0 0 8px 0">Timeline — Key Moments</h3>
+        <div class="timeline" aria-live="polite">
+          <div class="card" data-expanded>
+            <h4>Alan Turing (1950)</h4>
+            <div class="date">Turing proposes thinking machines</div>
+            <div class="extra">Alan Turing's 1950 paper "Computing Machinery and Intelligence" asked whether machines can think and proposed the Turing Test—an early foundational idea exploring machine intelligence.</div>
+          </div>
+          <div class="card">
+            <h4>Dartmouth Workshop (1956)</h4>
+            <div class="date">Birth of "Artificial Intelligence"</div>
+            <div class="extra">The Dartmouth workshop coined "AI" as a field. Researchers like John McCarthy, Marvin Minsky, Claude Shannon gathered to explore symbolic reasoning and the potential of machines.</div>
+          </div>
+          <div class="card">
+            <h4>Machine Learning Emerges (1980s-1990s)</h4>
+            <div class="date">Statistical approaches</div>
+            <div class="extra">Researchers moved from rule-based AI to statistical learning—algorithms that learn patterns from data, such as decision trees, SVMs, and early neural networks.</div>
+          </div>
+          <div class="card">
+            <h4>Deep Learning Breakthroughs (2010s)</h4>
+            <div class="date">Neural nets scale</div>
+            <div class="extra">With GPUs and large datasets, deep neural networks achieved major gains in vision, speech, and language tasks (e.g., AlexNet, ImageNet). This drove modern AI advances.</div>
+          </div>
+          <div class="card">
+            <h4>Generative AI (late 2010s–2020s)</h4>
+            <div class="date">Models that create</div>
+            <div class="extra">Transformers and large language models enabled powerful generative systems for text, images, and audio. These models can produce creative outputs from prompts.</div>
+          </div>
+          <div class="card">
+            <h4>Today & Beyond</h4>
+            <div class="date">Responsible deployment</div>
+            <div class="extra">AI is now widely used across education, health, science, and entertainment. Conversation continues on ethics, bias, transparency, and safe deployment in schools and society.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How AI Works -->
+      <section class="panel">
+        <h3 style="margin:0 0 8px 0">How AI Works — Simple Flow</h3>
+        <div class="flow" aria-hidden="false">
+          <div class="step"><strong>Collect Data</strong><br><small style="color:var(--muted)">Images, text, sensor readings</small></div>
+          <div class="arrow" aria-hidden="true"></div>
+          <div class="step"><strong>Train Model</strong><br><small style="color:var(--muted)">Learn patterns</small></div>
+          <div class="arrow" aria-hidden="true"></div>
+          <div class="step"><strong>Deploy Model</strong><br><small style="color:var(--muted)">Make predictions</small></div>
+          <div class="arrow" aria-hidden="true"></div>
+          <div class="step"><strong>Feedback & Improve</strong><br><small style="color:var(--muted)">Collect feedback, retrain</small></div>
+        </div>
+        <p style="color:var(--muted); margin-top:10px; font-size:13px">In practice, cycles of data, training, and feedback refine models. Prompts or inputs guide the model to produce outputs, which users then evaluate.</p>
+      </section>
+
+      <!-- AI Apps -->
+      <section class="panel" id="apps">
+        <h3 style="margin:0 0 8px 0">AI Web Apps — Try & Explore</h3>
+        <div class="apps-grid">
+          <div class="app-card" data-link="https://chat.openai.com/" title="Open ChatGPT">
+            <div class="app-icon">GPT</div>
+            <div class="app-info">
+              <div class="app-title">Chat Assist</div>
+              <div class="app-sub">Conversational tutoring & writing help</div>
+            </div>
+            <div class="app-side">Use for classroom Q&A, drafting, and explaining ideas. <br><a href="#" class="app-open" style="color:var(--cyan);">Open</a></div>
+          </div>
+
+          <div class="app-card" data-link="https://deepai.org/" title="Image/AI tools">
+            <div class="app-icon">AI</div>
+            <div class="app-info">
+              <div class="app-title">Image & Media</div>
+              <div class="app-sub">Create images or enhance media</div>
+            </div>
+            <div class="app-side">Great for art projects and visual demos. <br><a href="#" class="app-open" style="color:var(--cyan);">Open</a></div>
+          </div>
+
+          <div class="app-card" data-link="https://colab.research.google.com/" title="Notebooks">
+            <div class="app-icon">NB</div>
+            <div class="app-info">
+              <div class="app-title">Notebooks</div>
+              <div class="app-sub">Interactive experiments (code + text)</div>
+            </div>
+            <div class="app-side">Use for guided coding lessons, experiments, and demos. <br><a href="#" class="app-open" style="color:var(--cyan);">Open</a></div>
+          </div>
+
+          <div class="app-card" data-link="https://huggingface.co/" title="Models & Demos">
+            <div class="app-icon">HF</div>
+            <div class="app-info">
+              <div class="app-title">Model Hub</div>
+              <div class="app-sub">Browse models and try demos</div>
+            </div>
+            <div class="app-side">Explore model demos for language, vision, and audio. <br><a href="#" class="app-open" style="color:var(--cyan);">Open</a></div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="note">Designed for in-school display and quick mobile viewing — ideal for QR linking and classroom discussion.</footer>
+    </main>
+
+    <aside class="right">
+      <!-- Keyword explorer -->
+      <div class="panel">
+        <h4 style="margin:0 0 10px 0">Keyword Explorer</h4>
+        <div class="keywords" id="chips">
+          <div class="chip" data-key="Artificial Intelligence">Artificial Intelligence</div>
+          <div class="chip" data-key="Machine Learning">Machine Learning</div>
+          <div class="chip" data-key="Neural Network">Neural Network</div>
+          <div class="chip" data-key="Deep Learning">Deep Learning</div>
+          <div class="chip" data-key="Generative AI">Generative AI</div>
+          <div class="chip" data-key="Prompt">Prompt</div>
+          <div class="chip" data-key="Training Data">Training Data</div>
+        </div>
+        <div class="detail" id="keywordDetail">Click a keyword to see a short explanation and classroom-friendly example.</div>
+      </div>
+
+      <!-- Credits -->
+      <div class="panel">
+        <h4 style="margin:0 0 8px 0">AI Pioneers & Big Ideas</h4>
+        <div class="credits-wrap" id="creditsWrap" role="region" aria-label="Scrolling pioneers">
+          <div class="credits" id="credits">
+              Alan Turing — The idea of thinking machines and the Turing Test; a thought experiment that still inspires questions about intelligence and behavior.<br>
+              John McCarthy — Coined the term "Artificial Intelligence" and organized early research thinking about symbolic reasoning and representation.<br>
+              Marvin Minsky — Pioneer of AI architectures, cognitive modeling, and advocating interdisciplinary AI research between psychology and computing.<br>
+              Claude Shannon — Information theory foundations that underpin data transmission and learning from signals.<br>
+              Frank Rosenblatt — Perceptron research that inspired early neural approaches and debate about learning capabilities.<br>
+              Geoffrey Hinton — Key figure in resurrecting neural networks; contributions to backpropagation and deep learning breakthroughs.
+              Yann LeCun — Convolutional neural networks for vision and practical advancements in image recognition and representation learning.
+              Yoshua Bengio — Deep learning researcher emphasizing representation learning and the theoretical foundations for large networks.
+              GPUs & Hardware — The rise of parallel processors that made large-scale training practical and ushered in modern AI capabilities.
+              Transformers & Attention — A paradigm shift for language and multimodal models enabling context-aware generation and reasoning.
+              Generative Models & Creativity — From GANs to diffusion models and LLMs that produce art, stories, and new forms of media.
+              Reinforcement Learning — Agents that learn via trial, reward, and environment interactions powering robotics and game-playing agents.
+              Federated & Privacy-Preserving Learning — New directions for training across devices while protecting user data and privacy.
+              Self-Supervised Learning — Learning from raw data with minimal labels, unlocking vast new training regimes.
+              Multimodal Agents — Models that combine vision, language, audio, and action to create richer, more useful assistants.
+              Ethics, Fairness & Governance — Ongoing efforts to ensure AI systems are safe, transparent, and beneficial to society.
+              Education & Accessibility — AI tools that personalize learning, assist teachers, and open new pathways for student creativity.
+              Community & Open Research — The role of open models, datasets, and collaboration in accelerating understanding and responsible use.
+              Looking Forward — Researchers explore quantum ML, neuromorphic hardware, brain-computer interfaces, and lifelong learning systems.
+              <small>Tip: hover to pause. Tap to pause/resume on touch devices.</small>
+            </div>
+        </div>
+      </div>
+
+      <!-- Futuristic Methods -->
+      <section class="panel" id="futuristic">
+        <h3 style="margin:0 0 8px 0">Futuristic Methods — Emerging Directions</h3>
+        <div class="apps-grid">
+          <div class="app-card" title="Quantum Machine Learning">
+            <div class="app-icon">Q</div>
+            <div class="app-info">
+              <div class="app-title">Quantum ML</div>
+              <div class="app-sub">Explores quantum algorithms to speed up learning and optimization.</div>
+            </div>
+            <div class="app-side">Potential to accelerate large-scale model training and unlock new kinds of models.<br><a href="#" style="color:var(--cyan)">Learn more</a></div>
+          </div>
+
+          <div class="app-card" title="Neuromorphic Computing">
+            <div class="app-icon">N</div>
+            <div class="app-info">
+              <div class="app-title">Neuromorphic</div>
+              <div class="app-sub">Hardware inspired by neurons for low-power, event-driven AI.</div>
+            </div>
+            <div class="app-side">Good for always-on sensing and robotics with tight energy budgets.<br><a href="#" style="color:var(--cyan)">Learn more</a></div>
+          </div>
+
+          <div class="app-card" title="Federated & Privacy-Preserving">
+            <div class="app-icon">F</div>
+            <div class="app-info">
+              <div class="app-title">Federated Learning</div>
+              <div class="app-sub">Train models across devices while keeping data local.</div>
+            </div>
+            <div class="app-side">Enables privacy-aware personalization across student devices.<br><a href="#" style="color:var(--cyan)">Learn more</a></div>
+          </div>
+
+          <div class="app-card" title="Self-supervised & Continual">
+            <div class="app-icon">S</div>
+            <div class="app-info">
+              <div class="app-title">Self-Supervised</div>
+              <div class="app-sub">Models learn from raw data with little labeling, then adapt continually.</div>
+            </div>
+            <div class="app-side">Useful for lifelong learning agents and domain adaptation.<br><a href="#" style="color:var(--cyan)">Learn more</a></div>
+          </div>
+
+          <div class="app-card" title="Multimodal Agents">
+            <div class="app-icon">M</div>
+            <div class="app-info">
+              <div class="app-title">Multimodal Agents</div>
+              <div class="app-sub">Combine vision, language, and action for richer interactions.</div>
+            </div>
+            <div class="app-side">Enables assistants that see, hear, and act across apps and devices.<br><a href="#" style="color:var(--cyan)">Learn more</a></div>
+          </div>
+
+          <div class="app-card" title="Brain-Computer Interfaces">
+            <div class="app-icon">B</div>
+            <div class="app-info">
+              <div class="app-title">BCI</div>
+              <div class="app-sub">Research into safe ways to connect neural signals to AI systems.</div>
+            </div>
+            <div class="app-side">Early-stage but promising for accessibility and new interfaces.<br><a href="#" style="color:var(--cyan)">Learn more</a></div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Future Headlines (extra interactive feature) -->
+      <div class="panel">
+        <h4 style="margin:0 0 8px 0">Future Headlines ✨</h4>
+        <div class="headline-box">
+          <div class="headline-text" id="headlineText">Predicting tomorrow's AI in one line...</div>
+          <div style="margin-top:10px; display:flex; gap:8px; justify-content:center">
+            <button class="btn" id="genHeadline">Generate Headline</button>
+            <button class="btn" id="celebrate">Celebrate</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    /* Small QR generator (minimal QR code writer) - uses a lightweight implementation to avoid external libs.
+       This implementation generates a simple QR using an API when possible, and falls back to an embedded canvas-based creation.
+    */
+    async function makeQrDataURL(text, size=300){
+      try{
+        // Try a public qr server for quick generation (CORS-friendly for data URLs may vary)
+        const resp = await fetch('https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&data=' + encodeURIComponent(text));
+        const blob = await resp.blob();
+        return URL.createObjectURL(blob);
+      }catch(e){
+        // fallback: draw a placeholder canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#021019'; ctx.fillRect(0,0,size,size);
+        ctx.fillStyle = '#00f0ff'; ctx.font = '18px Arial'; ctx.fillText('QR', size/2-16, size/2+6);
+        return canvas.toDataURL();
+      }
+    }
+
+    // ---------- Cube / 3D interaction ----------
+    (function(){
+      const cube = document.getElementById('cube');
+      const stage = document.getElementById('stage');
+      const toggleBtn = document.getElementById('toggleSpin');
+      const resetBtn = document.getElementById('resetBtn');
+
+      let rotX = -20, rotY = 35; // starting angles
+      let autoSpin = true;
+      let dragging = false;
+      let lastX=0, lastY=0;
+      let velocityX=0, velocityY=0;
+
+      function apply(){
+        cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      }
+
+      // Auto-spin loop using requestAnimationFrame
+      let lastTime = performance.now();
+      function loop(t){
+        const dt = (t - lastTime) / 1000;
+        lastTime = t;
+        if(autoSpin && !dragging){
+          // slow spin, subtle
+          rotY += 20 * dt; // degrees per second
+          rotY = rotY % 360;
+        } else if(!dragging){
+          // gradual decay of velocity if any
+          rotY += velocityY * dt;
+          rotX += velocityX * dt;
+          velocityX *= 0.95;
+          velocityY *= 0.95;
+        }
+        apply();
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+
+      // Pointer (mouse/touch) handling for drag rotation
+      stage.addEventListener('pointerdown', (e)=>{
+        dragging = true;
+        autoSpin = false;
+        toggleBtn.textContent = 'Resume';
+        stage.setPointerCapture(e.pointerId);
+        lastX = e.clientX;
+        lastY = e.clientY;
+      });
+      stage.addEventListener('pointermove', (e)=>{
+        if(!dragging) return;
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+        lastX = e.clientX; lastY = e.clientY;
+        // sensitivity
+        rotY += dx * 0.4;
+        rotX -= dy * 0.4;
+        // clamp X to avoid flipping too far
+        rotX = Math.max(-85, Math.min(85, rotX));
+        velocityY = dx * 8;
+        velocityX = -dy * 8;
+      });
+      stage.addEventListener('pointerup', (e)=>{
+        dragging = false;
+        stage.releasePointerCapture && stage.releasePointerCapture(e.pointerId);
+        // leave autoSpin off; user can resume with button
+      });
+      stage.addEventListener('pointercancel', ()=>{ dragging=false });
+
+      toggleBtn.addEventListener('click', ()=>{
+        autoSpin = !autoSpin;
+        toggleBtn.textContent = autoSpin ? 'Pause' : 'Resume';
+      });
+
+      resetBtn.addEventListener('click', ()=>{
+        rotX = -20; rotY = 35; velocityX=velocityY=0;
+        apply();
+      });
+
+      // Initialize
+      apply();
+    })();
+
+    // ---------- Floating words (history & innovations) ----------
+    (function(){
+      const words = [
+        'Turing', 'Dartmouth', 'Symbolic AI', 'Neural Nets', 'Backpropagation', 'GPUs', 'AlexNet',
+        'Transformers', 'LLMs', 'Generative Art', 'Reinforcement Learning', 'Ethics', 'Bias', 'Education', 'Robotics'
+      ];
+      const wrap = document.getElementById('floatWrap');
+      const w = wrap.clientWidth || window.innerWidth;
+      const h = wrap.clientHeight || window.innerHeight;
+      // create floating elements at random positions
+      words.forEach((t,i)=>{
+        const el = document.createElement('div');
+        el.className = 'float-word';
+        el.textContent = t;
+        // random position biased across the main area
+        const left = 8 + Math.round(Math.random() * (Math.max(200,w-200)));
+        const top = 40 + Math.round(Math.random() * (Math.max(200,h-200)));
+        el.style.left = left + 'px';
+        el.style.top = top + 'px';
+        el.style.animationDuration = (6 + Math.random()*6) + 's';
+        el.style.opacity = 0.9 - Math.random()*0.4;
+        // click shows a quick info bubble
+        el.addEventListener('click', ()=>{
+          const info = {
+            'Turing':'Father of theoretical computer science and AI thinking.',
+            'Dartmouth':'1956 workshop that named the field "Artificial Intelligence".',
+            'Neural Nets':'Models inspired by brain neurons that learn from data.',
+            'Transformers':'Architecture enabling powerful language models and generative AI.',
+            'Ethics':'Important conversations about fairness, bias, and safety.'
+          };
+          const note = info[t] || 'A key idea or milestone in AI.';
+          // small toast
+          const toast = document.createElement('div');
+          toast.textContent = t + ': ' + note;
+          toast.style.position = 'fixed'; toast.style.left='50%'; toast.style.top='18%';
+          toast.style.transform='translateX(-50%)'; toast.style.background='rgba(2,6,23,0.95)';
+          toast.style.color='var(--muted)'; toast.style.padding='10px 14px'; toast.style.borderRadius='10px';
+          toast.style.border='1px solid rgba(255,255,255,0.04)'; toast.style.zIndex=9999;
+          document.body.appendChild(toast);
+          setTimeout(()=>toast.remove(), 2600);
+        });
+        wrap.appendChild(el);
+      });
+    })();
+
+    // ---------- AI apps interactions ----------
+    (function(){
+      document.querySelectorAll('.app-card').forEach(card=>{
+        const link = card.dataset.link;
+        const open = card.querySelector('.app-open');
+        open.addEventListener('click', (e)=>{ e.preventDefault(); window.open(link, '_blank'); });
+        // touch: allow tapping to reveal side panel
+        card.addEventListener('click', (e)=>{
+          if(window.innerWidth <= 760){
+            card.classList.toggle('expanded');
+            const side = card.querySelector('.app-side');
+            if(card.classList.contains('expanded')){ side.style.right = '64px'; side.style.opacity = 1; }
+            else { side.style.right = '-280px'; side.style.opacity = 0; }
+          }
+        });
+      });
+    })();
+
+    // ---------- QR generator UI ----------
+    (function(){
+      const gen = document.getElementById('genQr');
+      const input = document.getElementById('qrInput');
+      const imgBox = document.getElementById('qrImg');
+      gen.addEventListener('click', async ()=>{
+        const url = (input.value && input.value.trim()) || location.href;
+        imgBox.textContent = 'Generating...';
+        try{
+          const dataUrl = await makeQrDataURL(url, 300);
+          // show image
+          imgBox.innerHTML = '';
+          const a = document.createElement('a');
+          a.href = dataUrl; a.download = 'ai-journey-qr.png';
+          const img = document.createElement('img'); img.src = dataUrl; img.style.maxWidth='100%'; img.style.maxHeight='100%'; img.alt='QR Code';
+          a.appendChild(img);
+          imgBox.appendChild(a);
+          // instruct
+          const note = document.createElement('div'); note.style.fontSize='12px'; note.style.color='var(--muted)'; note.style.marginTop='6px'; note.textContent='Tap the QR to download.';
+          imgBox.appendChild(note);
+        }catch(e){ imgBox.textContent = 'Failed to generate QR'; }
+      });
+      // prefill input with page URL suggestion
+      input.value = '';
+      // Auto-generate QR for the current page on load
+      (async function auto(){
+        try{
+          const url = location.href;
+          const dataUrl = await makeQrDataURL(url, 300);
+          imgBox.innerHTML = '';
+          const a = document.createElement('a'); a.href = dataUrl; a.download = 'ai-journey-qr.png';
+          const img = document.createElement('img'); img.src = dataUrl; img.alt='QR Code'; img.style.maxWidth='100%'; img.style.maxHeight='100%';
+          a.appendChild(img);
+          imgBox.appendChild(a);
+          const note = document.createElement('div'); note.style.fontSize='12px'; note.style.color='var(--muted)'; note.style.marginTop='6px'; note.textContent='This QR points to this page (tap to download).';
+          imgBox.appendChild(note);
+        }catch(e){ /* ignore */ }
+      })();
+    })();
+
+    // ---------- Cube face dimension display ----------
+    (function(){
+      const faces = document.querySelectorAll('.face');
+      const dimPanel = document.getElementById('dimPanel');
+      const faceInfo = {
+        'Data': 'Size: Many GBs — Examples, labels, sensors. Quality and variety matter.',
+        'Training': 'Duration: Minutes to weeks — Uses compute (GPUs/TPUs) and algorithms.',
+        'Model': 'Parameters: Millions to billions — Encodes learned patterns.',
+        'Prompt / Input': 'Format: Text, image, or signals — What users provide to the model.',
+        'Output': 'Latency: Fast to seconds — Predictions, text, images returned.',
+        'Feedback': 'Loop: Human corrections, telemetry — Improves future training.'
+      };
+      faces.forEach(f=>{
+        const name = f.textContent.trim();
+        const dim = document.createElement('div'); dim.className='dim'; dim.textContent = faceInfo[name] || 'Info';
+        f.appendChild(dim);
+        f.addEventListener('mouseenter', ()=>{ dimPanel.textContent = name + ': ' + (faceInfo[name] || 'Details'); });
+        f.addEventListener('mouseleave', ()=>{ dimPanel.textContent = 'Hover a face to see details (Data, Training, Model, Prompt, Output, Feedback)'; });
+        // touch support: tap to toggle
+        f.addEventListener('click', ()=>{ f.classList.toggle('show-dim'); });
+      });
+    })();
+
+    // ---------- Offline QR generation (data URL snapshot) ----------
+    (function(){
+      const btn = document.getElementById('makeOfflineQr');
+      const status = document.getElementById('offlineStatus');
+      const area = document.getElementById('offlineQrArea');
+
+      async function tryMakeQr(text){
+        try{
+          status.textContent = 'Generating QR...';
+          const resp = await fetch('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(text));
+          if(!resp.ok) throw new Error('QR service error');
+          const blob = await resp.blob();
+          const url = URL.createObjectURL(blob);
+          return url;
+        }catch(e){ return null; }
+      }
+
+      btn.addEventListener('click', async ()=>{
+        area.innerHTML = '';
+        // create a minimal snapshot: take current body HTML but strip heavy scripts
+        status.textContent = 'Preparing snapshot...';
+        const snap = document.documentElement.outerHTML;
+        // Base64 encode - be mindful of size
+        try{
+          const dataUrl = 'data:text/html;base64,' + btoa(unescape(encodeURIComponent(snap)));
+          if(dataUrl.length > 2500*4){
+            // Provide a warning but still try
+            status.textContent = 'Snapshot is large ('+Math.round(dataUrl.length/1024)+'KB). Attempting QR generation; may fail.';
+          } else {
+            status.textContent = 'Snapshot prepared ('+Math.round(dataUrl.length/1024)+'KB). Generating QR...';
+          }
+          const qrUrl = await tryMakeQr(dataUrl);
+          if(qrUrl){
+            const a = document.createElement('a'); a.href = qrUrl; a.download = 'offline-ai-journey-qr.png';
+            const img = document.createElement('img'); img.src = qrUrl; img.alt='Offline QR'; img.style.maxWidth='140px'; img.style.maxHeight='140px';
+            a.appendChild(img);
+            area.appendChild(a);
+            const note = document.createElement('div'); note.style.color='var(--muted)'; note.style.fontSize='12px'; note.textContent='Tap the QR to download and print. Scan the QR on a phone to open the embedded page.';
+            area.appendChild(note);
+            status.textContent = 'QR ready (download & print).';
+          }else{
+            status.textContent = 'Failed to generate QR (snapshot too large for service).';
+            const msg = document.createElement('div'); msg.style.color='var(--muted)'; msg.style.fontSize='12px'; msg.textContent='Try hosting the page and generating a normal URL-based QR for reliable scanning.';
+            area.appendChild(msg);
+          }
+        }catch(err){ status.textContent = 'Error preparing snapshot.'; }
+      });
+    })();
+
+    // ---------- Future Headlines & Confetti ----------
+    (function(){
+      const headlines = [
+        'Students collaborate with AI tutors to ace projects',
+        'AI-assisted labs increase curiosity and creativity in class',
+        'Generative art showcased at school exhibition — made with AI',
+        'Teachers use AI tools to personalize learning paths',
+        'New student project: Classroom robot that learns empathy',
+        'School publishes ethical AI guidelines co-created with students'
+      ];
+      const btn = document.getElementById('genHeadline');
+      const celeb = document.getElementById('celebrate');
+      const text = document.getElementById('headlineText');
+      function pick(){ return headlines[Math.floor(Math.random()*headlines.length)]; }
+      btn.addEventListener('click', ()=>{ text.textContent = pick(); });
+      celeb.addEventListener('click', ()=>{ launchConfetti(); });
+
+      // Confetti implementation (simple)
+      function launchConfetti(){
+        const wrap = document.createElement('div'); wrap.className='confetti'; document.body.appendChild(wrap);
+        const colors = ['#00f0ff','#b300ff','#8affc1','#ffd1f0','#fff08a'];
+        for(let i=0;i<80;i++){
+          const p = document.createElement('div'); p.className='piece';
+          p.style.background = colors[Math.floor(Math.random()*colors.length)];
+          p.style.left = Math.random()*100 + '%'; p.style.top = '-10%';
+          p.style.transform = 'rotate(' + Math.random()*360 + 'deg)';
+          p.style.opacity = 0.95; p.style.width = (6+Math.random()*8)+'px'; p.style.height = (10+Math.random()*14)+'px';
+          wrap.appendChild(p);
+          // animate
+          const fall = 2000 + Math.random()*2200;
+          p.animate([
+            { transform: p.style.transform + ' translateY(0) rotate(0deg)', opacity:1 },
+            { transform: p.style.transform + ' translateY(120vh) rotate(360deg)', opacity:0.8 }
+          ], { duration: fall, easing:'cubic-bezier(.2,.7,.2,1)' });
+        }
+        setTimeout(()=>wrap.remove(), 4200);
+      }
+    })();
+
+    // ---------- Keywords explorer ----------
+    (function(){
+      const data = {
+        "Artificial Intelligence": {
+          short: "AI: machines that perform tasks that normally require human intelligence.",
+          example: "A tutor app that suggests practice problems based on student progress."
+        },
+        "Machine Learning": {
+          short: "Algorithms that learn patterns from data to make predictions or decisions.",
+          example: "A spelling corrector that learns common mistakes from examples."
+        },
+        "Neural Network": {
+          short: "A model inspired by brain neurons, organized in layers to learn complex patterns.",
+          example: "A network that recognizes handwritten digits."
+        },
+        "Deep Learning": {
+          short: "Neural networks with many layers that can learn high-level features.",
+          example: "Image recognition systems that identify objects in photos."
+        },
+        "Generative AI": {
+          short: "Models that create new content (text, images, audio) from learned patterns.",
+          example: "A tool that creates a short story from a prompt."
+        },
+        "Prompt": {
+          short: "User input or instruction that guides a model to produce a response.",
+          example: "Typing 'Write a poem about the moon' to get a poem."
+        },
+        "Training Data": {
+          short: "The examples used to teach a model; quality affects model performance and bias.",
+          example: "Labeled pictures of cats and dogs used to train a classifier."
+        }
+      };
+
+      const chips = document.querySelectorAll('.chip');
+      const detail = document.getElementById('keywordDetail');
+
+      function show(key){
+        const info = data[key];
+        if(!info) return;
+        detail.innerHTML = `<strong>${key}</strong><div style="margin-top:6px">${info.short}</div><div style="color:var(--muted);margin-top:8px;font-size:13px"><em>Example:</em> ${info.example}</div>`;
+        chips.forEach(c=>c.classList.toggle('active', c.dataset.key===key));
+      }
+
+      chips.forEach(c=>{
+        c.addEventListener('click', ()=> show(c.dataset.key));
+      });
+
+      // show default
+      show('Artificial Intelligence');
+    })();
+
+    // ---------- Timeline card tap expand for mobile ----------
+    (function(){
+      const cards = document.querySelectorAll('.timeline .card');
+      cards.forEach(c=>{
+        c.addEventListener('click', (e)=>{
+          // toggle expanded on small screens or when clicked
+          if(window.innerWidth <= 760){
+            c.classList.toggle('expanded');
+          }
+        });
+      });
+    })();
+
+    // ---------- Credits pause/resume for touch ----------
+    (function(){
+      const credits = document.getElementById('credits');
+      const wrap = document.getElementById('creditsWrap');
+
+      // Toggle paused class on click (useful for touch)
+      wrap.addEventListener('click', ()=>{
+        credits.classList.toggle('paused');
+      });
+
+      // Also allow keyboard accessibility
+      wrap.setAttribute('tabindex','0');
+      wrap.addEventListener('keydown', (e)=>{
+        if(e.key === ' ' || e.key === 'Enter'){ credits.classList.toggle('paused'); e.preventDefault(); }
+      });
+    })();
+
+    // ---------- Accessibility / small improvements ----------
+    (function(){
+      // Allow keyboard toggling of spin (space when focused on toggleBtn)
+      const toggleBtn = document.getElementById('toggleSpin');
+      toggleBtn.setAttribute('tabindex','0');
+      toggleBtn.addEventListener('keydown', (e)=>{
+        if(e.key === ' ' || e.key === 'Enter'){ toggleBtn.click(); e.preventDefault(); }
+      });
+    })();
+  </script>
+</body>
+</html>
