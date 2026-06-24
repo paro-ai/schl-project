@@ -37,16 +37,38 @@
     }
 
     .wrap{
-      width:1100px;
+      width:min(1150px, 100%);
       max-width:100%;
       display:grid;
       gap:20px;
-      grid-template-columns: 1fr 420px;
+      grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
       align-items:start;
     }
 
-    @media (max-width:950px){
+    @media (max-width:1024px){
       .wrap{grid-template-columns:1fr; padding-bottom:40px}
+      .hero{flex-direction:column; align-items:flex-start}
+      .hero-cta{width:100%; flex-wrap:wrap}
+      .model-card{flex-direction:column; align-items:stretch}
+      .model-controls{align-items:flex-start; min-width:0; width:100%}
+    }
+
+    @media (max-width:760px){
+      body{padding:14px}
+      .wrap{gap:14px}
+      .hero{gap:12px}
+      .hero-left{width:100%}
+      .hero-cta{flex-direction:column; align-items:stretch}
+      .btn{width:100%}
+      .cube-stage{width:100%; height:240px}
+      .model-card{padding:14px}
+      .model-controls{width:100%}
+      .dim-panel{width:100%}
+      .timeline, .apps-grid{grid-template-columns:1fr}
+      .flow{flex-direction:column; align-items:stretch}
+      .flow .arrow{width:4px; height:24px; margin:4px 0}
+      .qr-placeholder{flex-direction:column; align-items:flex-start}
+      .qr-box{width:100%; max-width:140px}
     }
 
     header.hero{
@@ -361,31 +383,6 @@
       opacity:0.28;
       mix-blend-mode:screen;
     }
-    /* floating words */
-    .float-wrap{
-      position:absolute; inset:0; pointer-events:none; z-index:1;
-    }
-    .float-word{
-      position:absolute;
-      padding:6px 10px;
-      border-radius:999px;
-      background: linear-gradient(90deg, rgba(0,240,255,0.06), rgba(179,0,255,0.06));
-      color:var(--text);
-      font-size:12px;
-      backdrop-filter: blur(6px);
-      border:1px solid rgba(255,255,255,0.03);
-      transform-origin:center;
-      animation: floaty 8s infinite linear;
-      opacity:0.95;
-      cursor:pointer;
-      pointer-events:auto;
-    }
-    @keyframes floaty{
-      0%{ transform: translateY(0) rotate(0deg) }
-      50%{ transform: translateY(-18px) rotate(3deg) }
-      100%{ transform: translateY(0) rotate(0deg) }
-    }
-
     /* AI apps */
     .apps-grid{
       display:grid; grid-template-columns: repeat(2,1fr); gap:12px;
@@ -421,7 +418,6 @@
 </head>
 <body>
   <div class="stars" aria-hidden="true"></div>
-  <div class="float-wrap" id="floatWrap" aria-hidden="true"></div>
 
   <div class="wrap" role="main">
     <header class="hero">
@@ -781,64 +777,25 @@
       apply();
     })();
 
-    // ---------- Floating words (history & innovations) ----------
-    (function(){
-      const words = [
-        'Turing', 'Dartmouth', 'Symbolic AI', 'Neural Nets', 'Backpropagation', 'GPUs', 'AlexNet',
-        'Transformers', 'LLMs', 'Generative Art', 'Reinforcement Learning', 'Ethics', 'Bias', 'Education', 'Robotics'
-      ];
-      const wrap = document.getElementById('floatWrap');
-      const w = wrap.clientWidth || window.innerWidth;
-      const h = wrap.clientHeight || window.innerHeight;
-      // create floating elements at random positions
-      words.forEach((t,i)=>{
-        const el = document.createElement('div');
-        el.className = 'float-word';
-        el.textContent = t;
-        // random position biased across the main area
-        const left = 8 + Math.round(Math.random() * (Math.max(200,w-200)));
-        const top = 40 + Math.round(Math.random() * (Math.max(200,h-200)));
-        el.style.left = left + 'px';
-        el.style.top = top + 'px';
-        el.style.animationDuration = (6 + Math.random()*6) + 's';
-        el.style.opacity = 0.9 - Math.random()*0.4;
-        // click shows a quick info bubble
-        el.addEventListener('click', ()=>{
-          const info = {
-            'Turing':'Father of theoretical computer science and AI thinking.',
-            'Dartmouth':'1956 workshop that named the field "Artificial Intelligence".',
-            'Neural Nets':'Models inspired by brain neurons that learn from data.',
-            'Transformers':'Architecture enabling powerful language models and generative AI.',
-            'Ethics':'Important conversations about fairness, bias, and safety.'
-          };
-          const note = info[t] || 'A key idea or milestone in AI.';
-          // small toast
-          const toast = document.createElement('div');
-          toast.textContent = t + ': ' + note;
-          toast.style.position = 'fixed'; toast.style.left='50%'; toast.style.top='18%';
-          toast.style.transform='translateX(-50%)'; toast.style.background='rgba(2,6,23,0.95)';
-          toast.style.color='var(--muted)'; toast.style.padding='10px 14px'; toast.style.borderRadius='10px';
-          toast.style.border='1px solid rgba(255,255,255,0.04)'; toast.style.zIndex=9999;
-          document.body.appendChild(toast);
-          setTimeout(()=>toast.remove(), 2600);
-        });
-        wrap.appendChild(el);
-      });
-    })();
+
 
     // ---------- AI apps interactions ----------
     (function(){
       document.querySelectorAll('.app-card').forEach(card=>{
         const link = card.dataset.link;
         const open = card.querySelector('.app-open');
-        open.addEventListener('click', (e)=>{ e.preventDefault(); window.open(link, '_blank'); });
+        if (open && link) {
+          open.addEventListener('click', (e)=>{ e.preventDefault(); window.open(link, '_blank'); });
+        }
         // touch: allow tapping to reveal side panel
         card.addEventListener('click', (e)=>{
           if(window.innerWidth <= 760){
             card.classList.toggle('expanded');
             const side = card.querySelector('.app-side');
-            if(card.classList.contains('expanded')){ side.style.right = '64px'; side.style.opacity = 1; }
-            else { side.style.right = '-280px'; side.style.opacity = 0; }
+            if (side) {
+              if(card.classList.contains('expanded')){ side.style.right = '64px'; side.style.opacity = 1; }
+              else { side.style.right = '-280px'; side.style.opacity = 0; }
+            }
           }
         });
       });
@@ -849,26 +806,25 @@
       const gen = document.getElementById('genQr');
       const input = document.getElementById('qrInput');
       const imgBox = document.getElementById('qrImg');
+
+      if (!gen || !input || !imgBox) return;
+
       gen.addEventListener('click', async ()=>{
         const url = (input.value && input.value.trim()) || location.href;
         imgBox.textContent = 'Generating...';
         try{
           const dataUrl = await makeQrDataURL(url, 300);
-          // show image
           imgBox.innerHTML = '';
           const a = document.createElement('a');
           a.href = dataUrl; a.download = 'ai-journey-qr.png';
           const img = document.createElement('img'); img.src = dataUrl; img.style.maxWidth='100%'; img.style.maxHeight='100%'; img.alt='QR Code';
           a.appendChild(img);
           imgBox.appendChild(a);
-          // instruct
           const note = document.createElement('div'); note.style.fontSize='12px'; note.style.color='var(--muted)'; note.style.marginTop='6px'; note.textContent='Tap the QR to download.';
           imgBox.appendChild(note);
         }catch(e){ imgBox.textContent = 'Failed to generate QR'; }
       });
-      // prefill input with page URL suggestion
       input.value = '';
-      // Auto-generate QR for the current page on load
       (async function auto(){
         try{
           const url = location.href;
@@ -912,6 +868,8 @@
       const btn = document.getElementById('makeOfflineQr');
       const status = document.getElementById('offlineStatus');
       const area = document.getElementById('offlineQrArea');
+
+      if (!btn || !status || !area) return;
 
       async function tryMakeQr(text){
         try{
